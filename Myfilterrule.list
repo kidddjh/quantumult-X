@@ -4,12 +4,6 @@
 # UPDATED: 2023-05-28 18:22:15
 # HOST-SUFFIX: 9
 # TOTAL: 9
-HOST-SUFFIX,ads-pixiv.net,Pixiv
-HOST-SUFFIX,booth.pm,Pixiv
-HOST-SUFFIX,fanbox.cc,Pixiv
-HOST-SUFFIX,pixiv.cat,Pixiv
-HOST-SUFFIX,pixiv.co.jp,Pixiv
-HOST-SUFFIX,pixiv.me,Pixiv
-HOST-SUFFIX,pixiv.net,Pixiv
-HOST-SUFFIX,pixiv.org,Pixiv
-HOST-SUFFIX,pximg.net,Pixiv
+HOST-SUFFIX, FEEDLY.COM, Myfilterrule
+HOST-SUFFIX, INOREADER.COM, Myfilterrule
+HOST-SUFFIX, RSSHUB.APP, Myfilterrule

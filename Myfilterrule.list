@@ -8,11 +8,6 @@ HOST-SUFFIX, FEEDLY.COM, Myfilterrule
 HOST-SUFFIX, INOREADER.COM, Myfilterrule
 HOST-SUFFIX, RSSHUB.APP, Myfilterrule
 HOST-SUFFIX, DEVIANTART.COM, Myfilterrule
-HOST-SUFFIX,notion-static.com,Notion
-HOST-SUFFIX,notion.com, Myfilterrule
-HOST-SUFFIX,notion.new, Myfilterrule
-HOST-SUFFIX,notion.site, Myfilterrule
-HOST-SUFFIX,notion.so, Myfilterrule
 IP-CIDR, 199.96.56.0/21, Myfilterrule
 HOST-SUFFIX, dmhy.anoneko.com, Myfilterrule
 HOST-SUFFIX, vk.com, Myfilterrule

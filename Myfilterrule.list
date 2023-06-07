@@ -15,3 +15,6 @@ HOST-SUFFIX,notion.site, Myfilterrule
 HOST-SUFFIX,notion.so, Myfilterrule
 IP-CIDR, 199.96.56.0/21, Myfilterrule
 HOST-SUFFIX, dmhy.anoneko.com, Myfilterrule
+HOST-SUFFIX, vk.com, Myfilterrule
+HOST-SUFFIX, vkuser.net, Myfilterrule
+HOST-SUFFIX, userapi.com, Myfilterrule

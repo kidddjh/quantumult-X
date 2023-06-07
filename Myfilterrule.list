@@ -3,12 +3,14 @@
 # REPO: https://github.com/blackmatrix7/ios_rule_script
 # UPDATED: 2023-05-28 18:22:15
 # HOST-SUFFIX: 9
-# TOTAL: 9
+# TOTAL: X
 HOST-SUFFIX, FEEDLY.COM, Myfilterrule
 HOST-SUFFIX, INOREADER.COM, Myfilterrule
 HOST-SUFFIX, RSSHUB.APP, Myfilterrule
 HOST-SUFFIX, DEVIANTART.COM, Myfilterrule
 IP-CIDR, 199.96.56.0/21, Myfilterrule
+IP-CIDR, 210.140.131.199, Myfilterrule
+IP-CIDR, 210.140.92.144, Myfilterrule
 HOST-SUFFIX, dmhy.anoneko.com, Myfilterrule
 HOST-SUFFIX, vk.com, Myfilterrule
 HOST-SUFFIX, vkuser.net, Myfilterrule

@@ -11,7 +11,6 @@ HOST-SUFFIX, DEVIANTART.COM, Myfilterrule
 IP-CIDR, 199.96.56.0/21, Myfilterrule
 IP-CIDR, 210.140.131.199/21, Myfilterrule
 IP-CIDR, 210.140.92.144/21, Myfilterrule
-HOST-SUFFIX, 123pan.com, Myfilterrule
 HOST-SUFFIX, dmhy.anoneko.com, Myfilterrule
 HOST-SUFFIX, vk.com, Myfilterrule
 HOST-SUFFIX, vkuser.net, Myfilterrule

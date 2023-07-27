@@ -1,4 +1,4 @@
-# NAME: Pixiv
+# NAME: MLGB
 # AUTHOR: kidddjh
 # REPO: https://github.com/blackmatrix7/ios_rule_script
 # UPDATED: 2023-05-28 18:22:15
@@ -17,3 +17,4 @@ HOST-SUFFIX, vkuser.net, Myfilterrule
 HOST-SUFFIX, userapi.com, Myfilterrule
 HOST-SUFFIX, jable.tv, Myfilterrule
 HOST-SUFFIX, pixhost.to, Myfilterrule
+HOST-SUFFIX, hayav.com, Myfilterrule

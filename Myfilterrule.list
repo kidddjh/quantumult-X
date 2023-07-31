@@ -13,7 +13,6 @@ IP-CIDR, 210.140.131.199/21, Myfilterrule
 IP-CIDR, 210.140.92.144/21, Myfilterrule
 HOST-SUFFIX, dmhy.anoneko.com, Myfilterrule
 HOST-SUFFIX, VK.COM , Myfilterrule
-HOST-SUFFIX, VKUSER,NET, Myfilterrule
 HOST-SUFFIX, AKIBA-ONLINE.COM, Myfilterrule
 HOST-SUFFIX, JABLE.COM, Myfilterrule
 HOST-SUFFIX, pixhost.to, Myfilterrule

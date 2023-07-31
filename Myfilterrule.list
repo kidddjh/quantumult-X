@@ -19,3 +19,4 @@ HOST-SUFFIX, jable.tv, Myfilterrule
 HOST-SUFFIX, pixhost.to, Myfilterrule
 HOST-SUFFIX, hayav.com, Myfilterrule
 HOST-SUFFIX, DMM.CO.JP, Myfilterrule
+HOST-SUFFIX, *.javbus.*, Myfilterrule

@@ -1,7 +1,7 @@
 # NAME: MLGBNSFW
 # AUTHOR: GENTLEMAN
 # Raw: https://raw.githubusercontent.com/kidddjh/quantumult-X/refs/heads/main/MyfilterruleClash.list
-rules:
+# rules:
 DOMAIN-SUFFIX, feedly.com
 DOMAIN-SUFFIX, inoreader.com
 DOMAIN-SUFFIX, rsshub.app

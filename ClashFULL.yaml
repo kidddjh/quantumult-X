@@ -32,6 +32,19 @@ proxy-groups:
       - 🇰🇷 韩国节点
       - 🚀 手动切换
       - DIRECT
+      - name: 💬 MyfilterruleClash
+    type: select
+    proxies:
+      - 🚀 节点选择
+      - ♻️ 自动选择
+      - 🇸🇬 狮城节点
+      - 🇭🇰 香港节点
+      - 🇨🇳 台湾节点
+      - 🇯🇵 日本节点
+      - 🇺🇲 美国节点
+      - 🇰🇷 韩国节点
+      - 🚀 手动切换
+      - DIRECT
   - name: 💬 OpenAi
     type: select
     proxies:
@@ -342,6 +355,13 @@ rule-providers:
     interval: 86400
     format: text
     type: http
+  MyfilterruleClash:
+    url: https://raw.githubusercontent.com/kidddjh/quantumult-X/refs/heads/main/MyfilterruleClash.list
+    path: ./ruleset/MyfilterruleClash.list
+    behavior: classical
+    interval: 86400
+    format: text
+    type: http
   OpenAi:
     url: https://ghp.ci/https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Ruleset/OpenAi.list
     path: ./ruleset/OpenAi.list
@@ -482,6 +502,7 @@ rules:
   - "RULE-SET,Microsoft,Ⓜ️ 微软服务"
   - "RULE-SET,Apple,🍎 苹果服务"
   - "RULE-SET,Telegram,📲 电报消息"
+  - "RULE-SET,MyfilterruleClash,💬 MyfilterruleClash"
   - "RULE-SET,OpenAi,💬 OpenAi"
   - "RULE-SET,NetEaseMusic,🎶 网易音乐"
   - "RULE-SET,Epic,🎮 游戏平台"

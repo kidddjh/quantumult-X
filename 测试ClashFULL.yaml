@@ -12,13 +12,49 @@ proxy-groups:
       - 🚀 手动切换
       - DIRECT
   - name: 🚀 手动切换
-    include-all: true
     type: select
-  - name: ♻️ 自动选择
-    type: url-test
+    proxies:
+      - 🇭🇰 香港节点
+      - 🇨🇳 台湾节点
+      - 🇸🇬 狮城节点
+      - 🇯🇵 日本节点
+      - 🇺🇲 美国节点
+      - 🇰🇷 韩国节点
+      - DIRECT
+  - name: 🇨🇳 台湾节点
+    type: select
+    proxies:
+      - DIRECT
+      - 🚀 节点选择
+  - name: 🇭🇰 香港节点
+    type: select
+    proxies:
+      - DIRECT
+      - 🚀 节点选择
+  - name: 🇺🇲 美国节点
+    type: select
+    proxies:
+      - DIRECT
+      - 🚀 节点选择
+  - name: 🇯🇵 日本节点
+    type: select
+    proxies:
+      - DIRECT
+      - 🚀 节点选择
+  - name: 🇸🇬 狮城节点
+    type: select
+    proxies:
+      - DIRECT
+      - 🚀 节点选择
+  - name: 🇰🇷 韩国节点
+    type: select
+    proxies:
+      - DIRECT
+      - 🚀 节点选择
+  - name: 🎥 奈飞节点
     include-all: true
-    interval: 300
-    tolerance: 50
+    filter: (?i)NF|奈飞|解锁|Netflix|NETFLIX|Media
+    type: select
   - name: 📲 电报消息
     type: select
     proxies:
@@ -488,38 +524,39 @@ rule-providers:
     interval: 86400
     format: text
     type: http
+  TaiwanIP:
+    type: http
+    behavior: ipcidr
+    url: "https://raw.githubusercontent.com/metowolf/iplist/master/data/country/TW.txt"
+    path: ./ruleset/TaiwanIP.txt
+    interval: 86400
+    format: text
+  KoreaIP:
+    type: http
+    behavior: ipcidr
+    url: "https://raw.githubusercontent.com/metowolf/iplist/master/data/country/KR.txt"
+    path: ./ruleset/KoreaIP.txt
+    interval: 86400
+    format: text
+  SingaporeIP:
+    type: http
+    behavior: ipcidr
+    url: "https://raw.githubusercontent.com/metowolf/iplist/master/data/country/SG.txt"
+    path: ./ruleset/SingaporeIP.txt
+    interval: 86400
+    format: text
 
 rules:
-  - "RULE-SET,LocalAreaNetwork,🎯 全球直连"
-  - "RULE-SET,UnBan,🎯 全球直连"
-  - "RULE-SET,BanAD,🛑 广告拦截"
-  - "RULE-SET,BanProgramAD,🍃 应用净化"
-  - "RULE-SET,GoogleFCM,📢 谷歌FCM"
-  - "RULE-SET,GoogleCN,🎯 全球直连"
-  - "RULE-SET,SteamCN,🎯 全球直连"
-  - "RULE-SET,Bing,Ⓜ️ 微软Bing"
-  - "RULE-SET,OneDrive,Ⓜ️ 微软云盘"
-  - "RULE-SET,Microsoft,Ⓜ️ 微软服务"
-  - "RULE-SET,Apple,🍎 苹果服务"
-  - "RULE-SET,Telegram,📲 电报消息"
-  - "RULE-SET,MyfilterruleClash,💬 MyfilterruleClash"
-  - "RULE-SET,OpenAi,💬 OpenAi"
-  - "RULE-SET,NetEaseMusic,🎶 网易音乐"
-  - "RULE-SET,Epic,🎮 游戏平台"
-  - "RULE-SET,Origin,🎮 游戏平台"
-  - "RULE-SET,Sony,🎮 游戏平台"
-  - "RULE-SET,Steam,🎮 游戏平台"
-  - "RULE-SET,Nintendo,🎮 游戏平台"
-  - "RULE-SET,YouTube,📹 油管视频"
-  - "RULE-SET,Netflix,🎥 奈飞视频"
-  - "RULE-SET,Bahamut,📺 巴哈姆特"
-  - "RULE-SET,BilibiliHMT,📺 哔哩哔哩"
-  - "RULE-SET,Bilibili,📺 哔哩哔哩"
-  - "RULE-SET,ChinaMedia,🌏 国内媒体"
-  - "RULE-SET,ProxyMedia,🌍 国外媒体"
-  - "RULE-SET,ProxyGFWlist,🚀 节点选择"
-  - "RULE-SET,ChinaDomain,🎯 全球直连"
-  - "RULE-SET,ChinaCompanyIp,🎯 全球直连"
-  - "RULE-SET,Download,🎯 全球直连"
+  - "RULE-SET,TaiwanIP,🇨🇳 台湾节点"
+  - "RULE-SET,ChinaIP,🎯 全球直连"
+  - "RULE-SET,HongKongIP,🇭🇰 香港节点"
+  - "RULE-SET,USIP,🇺🇲 美国节点"
+  - "RULE-SET,JapanIP,🇯🇵 日本节点"
+  - "RULE-SET,KoreaIP,🇰🇷 韩国节点"
+  - "RULE-SET,SingaporeIP,🇸🇬 狮城节点"
+  - "RULE-SET,BanAD,REJECT"
+  - "RULE-SET,BanProgramAD,REJECT"
   - "GEOIP,CN,🎯 全球直连"
   - "MATCH,🐟 漏网之鱼"
+  - "MATCH,🚀 手动切换"
+

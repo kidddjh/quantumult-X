@@ -356,8 +356,8 @@ rule-providers:
     format: text
     type: http
   MyfilterruleClash:
-    url: https://raw.githubusercontent.com/kidddjh/quantumult-X/refs/heads/main/MyfilterruleClash.list
-    path: ./ruleset/MyfilterruleClash.list
+    url: https://raw.githubusercontent.com/kidddjh/quantumult-X/refs/heads/main/MyfilterruleQX.list
+    path: ./ruleset/MyfilterruleQX.list
     behavior: classical
     interval: 86400
     format: text

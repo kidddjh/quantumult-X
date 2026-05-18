@@ -1,15 +1,11 @@
-/**
- * Quantumult X 脚本: ImageBam 图床穿透
- *
- * 支持两种格式:
- * 1. thumbsN.imagebam.com/.../ID_t.jpg → www.imagebam.com/images/ID
- * 2. thumbnailsN.imagebam.com/数字/ID.jpg → www.imagebam.com/images/ID
- */
+// Quantumult X 脚本: ImageBam 图床穿透
+//
+// 格式1: thumbsN.imagebam.com/.../ID_t.jpg → www.imagebam.com/images/ID
+// 格式2: thumbnailsN.imagebam.com/数字/ID.jpg → www.imagebam.com/images/ID
 
 let url = $request.url;
 let headers = $request.headers;
 
-// 格式 1: thumbsN.imagebam.com + _t.jpg
 if (url.includes("imagebam.com") && url.includes("_t.jpg")) {
     let match = url.match(/\/([a-zA-Z0-9]+)_t\.jpg$/);
     if (match) {
@@ -24,7 +20,6 @@ if (url.includes("imagebam.com") && url.includes("_t.jpg")) {
         $done({});
     }
 }
-// 格式 2: thumbnailsN.imagebam.com/数字/ID.jpg (无 _t 后缀)
 else if (/thumbnails\d+\.imagebam\.com\/\d+\/[a-zA-Z0-9]+\.jpg$/i.test(url)) {
     let match = url.match(/\/(\d+)\/([a-zA-Z0-9]+)\.jpg$/i);
     if (match) {

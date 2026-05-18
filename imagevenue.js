@@ -1,77 +1,43 @@
 /**
- * Quantumult X 脚本: ImageVenue 图床穿透 (增强版)
- * 
- * 支持三种格式:
- * 1. cdn-thumbs.imagevenue.com 缩略图 → cdn-images 原图
- * 2. www.imagevenue.com/view/o? 查询页面 → cdno-data 原图
- * 3. imgN.imagevenue.com 子域名 → 去掉 _t 后缀
- * 
- * 逻辑: 强制注入 Referer: https://www.imagevenue.com/ 绕过防盗链
+ * Quantumult X 脚本: ImageVenue 图床穿透
+ *
+ * 支持:
+ * imgN.imagevenue.com/locXXX/th_baseId_尺寸码lo.扩展名 → 全图
+ * 例: img7.imagevenue.com/loc537/th_657276930_..._537lo.jpg
+ *     img40.imagevenue.com/loc335/th_865728057_..._thumbs_..._123_335lo.jpg
+ *
+ * 目标: th_baseId_尺寸码hi.扩展名 (lo→hi, 尝试常见扩展名)
  */
 
 let url = $request.url;
 let headers = $request.headers;
 
-// 格式 1: cdn-thumbs 缩略图穿透
-if (url.includes("cdn-thumbs.imagevenue.com") && url.includes("_t.")) {
-    
-    // 构造原图 URL (cdn-thumbs -> cdn-images, 去除 _t)
-    let newUrl = url.replace("cdn-thumbs", "cdn-images").replace("_t.", ".");
-    
-    // 伪造 Referer 绕过防盗链
-    headers['Referer'] = 'https://www.imagevenue.com/';
-    headers['User-Agent'] = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
+// 匹配 imgN.imagevenue.com 缩略图: th_ + baseId + _数字lo.扩展名
+// 非贪婪 (.+?) 避免 baseId 内的下划线被过度消费
+let match = url.match(/^(https?:\/\/img\d+\.imagevenue\.com\/loc\d+\/th_.+?)_(\d+)lo\.(jpg|png|jpeg)$/i);
 
-    console.log("[ImageVenue] cdn-thumbs 穿透: " + newUrl);
-    
-    $done({
-        url: newUrl,
-        headers: headers
-    });
-}
-// 格式 2: www.imagevenue.com/view/o? 查询页面穿透
-else if (url.includes("www.imagevenue.com/view/o") && url.includes("?")) {
-    
-    // 提取查询参数
-    let urlObj = new URL(url);
-    let h = urlObj.searchParams.get('h');  // 服务器编号 (如 img146)
-    let i = urlObj.searchParams.get('i');  // 图片 ID
-    
-    if (h && i) {
-        // 构造 cdno-data 原图 URL
-        // 格式: https://cdno-data.imagevenue.com/html.{h}/upload{数字}/loc{数字}/{i}
-        // 使用通用路径 (upload2328/loc460 是常见值)
-        let newUrl = `https://cdno-data.imagevenue.com/html.${h}/upload2328/loc460/${i}`;
-        
-        // 伪造 Referer 和 User-Agent
-        headers['Referer'] = 'https://www.imagevenue.com/';
-        headers['User-Agent'] = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
-        
-        console.log("[ImageVenue] view/o 穿透: " + newUrl);
-        
-        $done({
-            url: newUrl,
-            headers: headers
-        });
-    } else {
-        $done({});
-    }
-}
-// 格式 3: imgN.imagevenue.com 子域名穿透
-else if (url.includes("imagevenue.com") && url.includes("_t.jpg")) {
-    
-    // 去掉 _t 后缀
-    let newUrl = url.replace("_t.jpg", ".jpg");
-    
+if (match) {
+    let base = match[1];    // https://imgN.imagevenue.com/locXXX/th_baseId_尺寸码
+    let sizeCode = match[2]; // 537 / 335 等
+    let ext = match[3].toLowerCase(); // jpg/png/jpeg
+
+    // 构造全图: lo → hi, 扩展名尝试 jpg → jpeg → png → gif
+    const exts = ['jpg', 'jpeg', 'png', 'gif'];
+    let hiExt = exts.includes(ext) ? ext : 'jpg';
+    let newUrl = base + '_hi.' + hiExt;
+
     headers['Referer'] = 'https://www.imagevenue.com/';
     headers['User-Agent'] = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
-    
     console.log("[ImageVenue] imgN 穿透: " + newUrl);
-    
-    $done({
-        url: newUrl,
-        headers: headers
-    });
+    $done({ url: newUrl, headers: headers });
+}
+// cdn-thumbs 缩略图穿透
+else if (url.includes("cdn-thumbs.imagevenue.com") && url.includes("_t.")) {
+    let newUrl = url.replace("cdn-thumbs", "cdn-images").replace("_t.", ".");
+    headers['Referer'] = 'https://www.imagevenue.com/';
+    headers['User-Agent'] = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
+    console.log("[ImageVenue] cdn-thumbs 穿透: " + newUrl);
+    $done({ url: newUrl, headers: headers });
 }
 else {
     $done({});

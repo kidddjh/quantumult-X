@@ -1,72 +1,73 @@
 /**
- * XXXClub RSS Full Content Script for Quantumult X
- * 功能：将只有磁力链接的 RSS 改写为包含封面图、正文和标签的全文 RSS
+ * XXXClub RSS Full Content Script Pro (Precision Version)
  */
 
-const request_limit = 8; // 限制处理前几个条目，避免脚本执行超时
+const request_limit = 5; 
+const cache_key = "xxxclub_rss_v2";
 let body = $response.body;
 
 async function fetchFullContent() {
-    // 1. 匹配所有的 item
     let items = body.match(/<item>[\s\S]*?<\/item>/g) || [];
     let count = Math.min(items.length, request_limit);
-    
-    console.log(`开始处理 XXXClub RSS, 共有 ${items.length} 个条目，处理前 ${count} 个`);
+    let cache = JSON.parse($prefs.valueForKey(cache_key) || "{}");
 
     for (let i = 0; i < count; i++) {
         let item = items[i];
-        // 提取标题
         let titleMatch = item.match(/<title>(.*?)<\/title>/);
         if (!titleMatch) continue;
         
-        let title = titleMatch[1];
-        let searchTitle = encodeURIComponent(title.replace(/1080p|720p|MP4|\[.*?\]/gi, '').trim());
-        let searchUrl = `https://xxxclub.to/search/${searchTitle}/`;
+        let rawTitle = titleMatch[1];
+        // 搜索词优化：只保留前 4 个单词，确保搜索成功率
+        let searchTitle = rawTitle
+            .replace(/1080p|720p|MP4|HEVC|x264|x265|\[.*?\]|\d{2}\s\d{2}\s\d{4}/gi, '')
+            .split(/\s+/).slice(0, 4).join(' ').trim();
+
+        if (cache[rawTitle]) {
+            body = body.replace(item, cache[rawTitle]);
+            continue;
+        }
 
         try {
-            // 2. 搜索详情页链接
-            let searchRes = await httpGet(searchUrl);
-            let detailPathMatch = searchRes.match(/<a href="(\/torrent\/\d+\/.*?\.html)"/);
+            // 搜索请求
+            let searchRes = await httpGet(`https://xxxclub.to/torrents/search?q=${encodeURIComponent(searchTitle)}`);
+            // 匹配详情页链接
+            let detailPathMatch = searchRes.match(/\/torrents\/details\/\d+/);
             
             if (detailPathMatch) {
-                let detailUrl = `https://xxxclub.to${detailPathMatch[1]}`;
+                let detailRes = await httpGet(`https://xxxclub.to${detailPathMatch[0]}`);
                 
-                // 3. 抓取详情页内容
-                let detailRes = await httpGet(detailUrl);
+                // 1. 提取大封面
+                let coverMatch = detailRes.match(/class="detailsimg"[\s\S]*?src="([^"]+)"/);
+                let coverHtml = coverMatch ? `<img src="${coverMatch[1]}" /><br/><hr/>` : "";
                 
-                // 提取封面 (通常在 id="torrent-cover" 附近或 meta 标签)
-                let imgMatch = detailRes.match(/<img[^>]*src="(https:\/\/imgxclub\.com\/images\/[^"]+)"[^>]*id="torrent-cover"/);
-                let coverHtml = imgMatch ? `<img src="${imgMatch[1]}" /><br/>` : "";
+                // 2. 提取描述区域 (Cast + Synopsis)
+                let descMatch = detailRes.match(/class="description"[\s\S]*?>([\s\S]*?)<\/div>/);
+                let descHtml = descMatch ? descMatch[1].trim() : "No details available.";
                 
-                // 提取剧情 (Story)
-                let storyMatch = detailRes.match(/<div[^>]*id="story"[^>]*>([\s\S]*?)<\/div>/);
-                let storyHtml = storyMatch ? `<h3>Story:</h3><p>${storyMatch[1].trim()}</p>` : "";
-                
-                // 提取标签 (Tags)
-                let tagsMatch = detailRes.match(/<div[^>]*class="tags"[^>]*>([\s\S]*?)<\/div>/);
-                let tagsHtml = tagsMatch ? `<p><b>Tags:</b> ${tagsMatch[1].replace(/<[^>]+>/g, ' ').trim()}</p>` : "";
+                // 3. 处理描述中的缩略图为大图 (如有)
+                descHtml = descHtml.replace(/imgtraffic\.com\/1s\//g, "imgtraffic.com/1/");
 
-                // 4. 组合内容并注入 description
-                let description = `<![CDATA[${coverHtml}${storyHtml}${tagsHtml}]]>`;
-                let newItem = item.replace(/<description\/>|<description>.*?<\/description>/, `<description>${description}</description>`);
+                let fullContent = `<![CDATA[${coverHtml}${descHtml}]]>`;
+                let newItem = item.replace(/<description\/>|<description>.*?<\/description>/, `<description>${fullContent}</description>`);
                 
+                cache[rawTitle] = newItem;
                 body = body.replace(item, newItem);
             }
         } catch (e) {
-            console.log(`处理条目失败: ${title}, 错误: ${e}`);
+            console.log(`[XXXClub] Failed: ${searchTitle}`);
         }
     }
 
+    $prefs.setValueForKey(JSON.stringify(cache), cache_key);
     $done({ body });
 }
 
-// 辅助函数：封装 QX 的异步 GET 请求
 function httpGet(url) {
-    return new Promise((resolve, reject) => {
-        $httpClient.get({ url }, (err, resp, data) => {
-            if (err) reject(err);
-            else resolve(data);
-        });
+    return new Promise((resolve) => {
+        $httpClient.get({ 
+            url, 
+            headers: { "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1" } 
+        }, (err, resp, data) => resolve(data || ""));
     });
 }
 

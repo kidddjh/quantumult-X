@@ -1,48 +1,47 @@
 /**
- * ImageTwist All-in-One 终极穿透脚本
- * 功能：1. 自动高清(th->i) 2. 修复预览大图路径(jpeg/文件名) 3. 绕过防盗链
+ * ImageTwist Host-Centric Resolver (重构版)
+ * 目标：不依赖论坛，直接在图床端解决：1.高清跳转 2.查看页解析 3.防盗链
  */
 
 const isRequest = typeof $request !== "undefined";
-const isResponse = typeof $response !== "undefined";
+const url = $request ? $request.url : "";
 
-// --- 1. 处理请求 (Header 修改 & 自动高清跳转) ---
 if (isRequest) {
-    let url = $request.url;
-    let headers = $request.headers;
-
-    // A. 自动高清跳转 (th -> i)
+    // 1. 缩略图穿透逻辑 (th -> i)
+    // 匹配: imgN.imagetwist.com/th/FOLDER/ID.jpg
     if (url.includes('/th/')) {
         let newUrl = url.replace('/th/', '/i/');
         $done({ response: { status: 302, headers: { Location: newUrl } } });
-    } 
-    // B. 防盗链绕过 (为所有原图请求注入 Referer)
+    }
+
+    // 2. 查看页深度解析逻辑 (解决预览大图后缀/文件名报错问题)
+    // 匹配: imagetwist.com/ID/Filename.ext
+    else if (url.match(/https?:\/\/(?:www\.)?imagetwist\.com\/[a-z0-9]+\/[^/]+$/)) {
+        // 在后台静默抓取页面，寻找 id="main-image" 的真实地址
+        $httpClient.get(url, (error, response, data) => {
+            if (!error && data) {
+                // 提取真实原图地址 (包含正确的后缀和文件名)
+                const imgMatch = data.match(/<img[^>]+id="main-image"[^>]+src="([^"]+)"/);
+                if (imgMatch && imgMatch[1]) {
+                    console.log("[ImageTwist] 深度解析成功: " + imgMatch[1]);
+                    $done({ response: { status: 302, headers: { Location: imgMatch[1] } } });
+                    return;
+                }
+            }
+            $done({}); // 抓取失败则保持现状
+        });
+    }
+
+    // 3. 全局防盗链注入 (所有原图服务器)
     else if (url.includes('/i/')) {
+        let headers = $request.headers;
         headers['Referer'] = 'https://imagetwist.com/';
         $done({ headers });
-    } 
+    }
+
     else {
         $done({});
     }
-}
-
-// --- 2. 处理响应 (修复论坛页面中的预览大图链接) ---
-if (isResponse) {
-    let body = $response.body;
-    if (body) {
-        // 核心：扫描页面，把那些会报错的 ID.jpg 预览图地址，修正为带正确文件名和后缀的直连地址
-        const regex = /<a href="(https?:\/\/imagetwist\.com\/([a-z0-9]+)\/([^"]+?)\.(jpe?g|png|gif))"[^>]*>\s*<img src="(https?:\/\/((?:img|s)\d+)\.imagetwist\.com)\/th\/(\d+)\/([a-z0-9]+)\.jpg"/gi;
-        
-        body = body.replace(regex, (match, pageUrl, id, filename, ext, baseUrl, server, folder, imgId) => {
-            if (id === imgId) {
-                // 拼接真实直连地址，解决 .jpeg 或文件名导致的 404 报错
-                const directUrl = `${baseUrl}/i/${folder}/${id}.${ext}/${filename}.${ext}`;
-                return `<a href="${directUrl}"><img src="${directUrl}" style="max-width:100%;"`;
-            }
-            return match;
-        });
-        $done({ body });
-    } else {
-        $done({});
-    }
+} else {
+    $done({});
 }

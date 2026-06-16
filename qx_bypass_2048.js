@@ -1,78 +1,58 @@
 // ============================================================
-// qx_bypass_2048.js — Quantumult X 脚本
-// 功能: 永久绕过 2048 论坛 (0rsh.zskmqt.com) 的 JS 反爬机制
+// 2048 论坛通用 safeid 绕过脚本（for Quantumult X / Surge）
+// 通吃所有 2048 镜像站：ewtvpm.com / lurj7988.com / zskmqt.com 等
 //
-// GitHub 远程引用方式:
-// ------------------------------------------------------------
-// [rewrite_local]
-// ^https:\/\/0rsh\.zskmqt\.com\/read\.php\?tid=\d+ url script-response-body https://raw.githubusercontent.com/kidddjh/quantumult-X/main/qx_bypass_2048.js
-// ^https:\/\/0rsh\.zskmqt\.com\/read\.php\?tid=\d+ url script-request-header https://raw.githubusercontent.com/kidddjh/quantumult-X/main/qx_bypass_2048.js
+// 安装方式（二选一）：
 //
-// [mitm]
-// hostname = %APPEND% 0rsh.zskmqt.com
+// QX: [rewrite_remote] 下加两条或合一条用
+//   ^https?:\/\/.*\/read\.php\?tid=\d+ url script-request-header 2048_safeid_bypass.js
+//   ^https?:\/\/.*\/read\.php\?tid=\d+ url script-response-body 2048_safeid_bypass.js
+//
+// Surge: [MITM] + [Script] 段
+//   http-response ^https?:\/\/.*\/read\.php\?tid=\d+ requires-body=1,max-size=0,script-path=2048_safeid_bypass.js
+//   http-request ^https?:\/\/.*\/read\.php\?tid=\d+ script-path=2048_safeid_bypass.js
 // ============================================================
 
-const STORAGE_KEY = '2048_safe_cookie';
-const DOMAIN = '0rsh.zskmqt.com';
+// 持久化存储的 key 名
+const SAFEID_KEY = '2048_safeid';
 
-function handleResponse() {
-  const ct = ($response.headers['Content-Type'] || $response.headers['content-type'] || '').toLowerCase();
-  if (!ct.includes('text/html')) {
-    $done({});
-    return;
-  }
-  const body = typeof $response.body === 'string' ? $response.body : '';
-  const match = body.match(/safeid='([^']+)'/);
-  if (!match) {
-    $done({});
-    return;
-  }
-  const safeid = match[1];
-  $prefs.setValueForKey(safeid, STORAGE_KEY);
-  $done({
-    status: 302,
-    headers: {
-      'Location': $request.url,
-      'Set-Cookie': `_safe=${safeid}; Max-Age=86400; Path=/; Domain=${DOMAIN}`,
-      'Cache-Control': 'no-cache, no-store, must-revalidate'
+(function () {
+  const url = $request.url;
+  const isRequest = typeof $response === 'undefined';
+
+  if (isRequest) {
+    // ===================== 请求阶段 =====================
+    // 从持久化存储中取出之前捕获的 safeid
+    const savedSafeid = $prefs.valueForKey(SAFEID_KEY);
+    if (savedSafeid) {
+      const headers = $request.headers;
+      const existingCookie = headers['Cookie'] || '';
+      if (existingCookie.indexOf('_safe=') === -1) {
+        // 还没有 _safe cookie，注入
+        headers['Cookie'] = existingCookie
+          ? `${existingCookie}; _safe=${savedSafeid}`
+          : `_safe=${savedSafeid}`;
+      }
+      $done({ headers });
+    } else {
+      // 还没捕获到 safeid，直接放行（等响应阶段捕获）
+      $done({});
     }
-  });
-}
-
-function handleRequest() {
-  const savedSafeId = $prefs.valueForKey(STORAGE_KEY);
-  if (!savedSafeId) {
-    $done({});
-    return;
-  }
-  let headers = { ...$request.headers };
-  const existing = headers['Cookie'] || headers['cookie'] || '';
-  if (existing.includes('_safe=')) {
-    $done({});
-    return;
-  }
-  headers['Cookie'] = existing
-    ? `${existing}; _safe=${savedSafeId}`
-    : `_safe=${savedSafeId}`;
-  $done({
-    request: {
-      url: $request.url,
-      method: $request.method,
-      headers: headers,
-      body: $request.body
-    }
-  });
-}
-
-try {
-  if (typeof $response !== 'undefined' && $response !== null) {
-    handleResponse();
   } else {
-    handleRequest();
+    // ===================== 响应阶段 =====================
+    const body = typeof $response.body === 'string' ? $response.body : '';
+
+    // 如果页面标题是单个人名（"孔子"、"墨子"等），说明触发了 safeid 挑战
+    // 直接匹配 safeid 变量
+    const match = body.match(/safeid='([^']+)'/);
+    if (match) {
+      const freshSafeid = match[1];
+      $prefs.setValueForKey(freshSafeid, SAFEID_KEY);
+      console.log(`[2048 Bypass] 捕获到 safeid: ${freshSafeid}`);
+      // 注意：此处不修改 body，QX 会自动用新注入的 cookie 重发请求
+    }
+
+    $done({ body });
   }
-} catch (e) {
-  if (typeof $notification !== 'undefined') {
-    $notification.post('2048 绕过', '❌ 脚本错误', e.message);
-  }
-  $done({});
-}
+})();
+
